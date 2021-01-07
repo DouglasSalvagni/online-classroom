@@ -10,7 +10,7 @@ interface SuccessResponseType {
   name: string;
   email: string;
   cellphone: string;
-  teacher: true;
+  teacher: boolean;
   coins: number;
   courses: string[];
   available_hours: Record<string, number[]>;
@@ -26,10 +26,30 @@ export default async (
   // SHOW USER PROFILE
 
   if (req.method === 'POST') {
-    const { name, email, cellphone, teacher } = req.body;
+    const {
+      name,
+      email,
+      cellphone,
+      teacher,
+      courses,
+      avaliable_hours,
+      avaliable_locations,
+    } = req.body;
 
-    if (!name || !email || !cellphone || !teacher)
-      return res.status(400).json({ error: 'Missing body parameter' });
+    if (!teacher) {
+      if (!name || !email || !cellphone)
+        return res.status(400).json({ error: 'Missing body parameter' });
+    } else if (teacher) {
+      if (
+        !name ||
+        !email ||
+        !cellphone ||
+        !courses ||
+        !avaliable_hours ||
+        !avaliable_locations
+      )
+        return res.status(400).json({ error: 'Missing body parameter' });
+    }
 
     const { db } = await connect();
 
@@ -38,10 +58,28 @@ export default async (
       email,
       cellphone,
       teacher,
+      coins: 1,
+      courses: courses || [],
+      avaliable_hours: avaliable_hours || {},
+      avaliable_locations: avaliable_locations || [],
+      reviews: [],
+      appointments: [],
     });
 
     res.status(200).json(response.ops[0]);
+  } else if (req.method === 'GET') {
+    const { email } = req.body;
+
+    if (!email)
+      return res.status(400).json({ error: 'Missing email on request body' });
+
+    const { db } = await connect();
+
+    const response = await db.collection('users').findOne({ email });
+    if (!response) return res.status(400).json({ error: 'Email not found' });
+
+    res.status(200).json(response);
   } else {
-    res.status(400).json({ error: 'Something went wrong' });
+    res.status(400).json({ error: 'Wrong request method' });
   }
 };
