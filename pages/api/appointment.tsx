@@ -38,6 +38,15 @@ export default async (
       courses,
       location,
       appointment_link,
+    }: {
+      date: string;
+      teacher_name: string;
+      teacher_id: string;
+      studant_name: string;
+      studant_id: string;
+      courses: string;
+      location: string;
+      appointment_link: string;
     } = req.body;
 
     if (
@@ -86,14 +95,14 @@ export default async (
       .collection('users')
       .updateOne(
         { _id: new ObjectID(teacher_id) },
-        { $push: { appointments: appointment } }
+        { $push: { appointments: appointment }, $inc: { coins: 1 } }
       );
 
     await db
       .collection('users')
       .updateOne(
         { _id: new ObjectID(studant_id) },
-        { $push: { appointments: appointment } }
+        { $push: { appointments: appointment }, $inc: { coins: -1 } }
       );
 
     res.status(200).json(appointment);

@@ -21,7 +21,11 @@ export default async (
 
     const { db } = await connect();
 
-    const response = await db.collection('users').find({ courses }).toArray();
+    const response = await db
+      .collection('users')
+      .find({ courses: { $in: [new RegExp(`^${courses}`, 'i')] } })
+      .toArray();
+
     if (response.length === 0)
       return res.status(400).json({ error: 'Course not found' });
 
