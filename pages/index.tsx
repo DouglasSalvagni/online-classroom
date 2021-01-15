@@ -7,7 +7,7 @@ const IndexPage: NextPage = () => {
   const [session, loading] = useSession();
 
   return (
-    <div className="text-white">
+    <div>
       <Nav />
       {!session && (
         <div className="text-3xl">
